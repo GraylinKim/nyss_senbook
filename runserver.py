@@ -6,13 +6,7 @@ import tornado.httpserver
 
 from database import Database
 from settings import settings
-
-class BaseHandler(tornado.web.RequestHandler):
-    """A Base Handle for adding global functionality at a later point"""
-
-class MainHandler(BaseHandler):
-    def get(self):
-        self.render('templates/index.html', title='Search for your NASA Homies')
+from handlers import MainHandler
 
 # Create, Configure, and Connect to couchdb, store connection in settings
 settings['db'] = Database(**settings['db_settings']).configure().connect()
