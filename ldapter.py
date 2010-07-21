@@ -1,7 +1,7 @@
 import ldap
 import settings
 
-class ldaptor:
+class ldapter(object):
     
     methods = ['simple','sasl']
     def __init__(self,url,**kwargs):
@@ -32,12 +32,12 @@ class ldaptor:
             for result in result_data:
                 yield result
 
-    def connect(self,url,who='',cred='',method='simple',**kwargs):
+    def connect(self):
         
-        self.server = ldap.initialize(url)
-        if method == 'simple':
-            self.server.simple_bind_s(who,cred)
-        elif method == 'sasl':
+        self.server = ldap.initialize(self.url)
+        if self.method == 'simple':
+            self.server.simple_bind_s(self.who,self.cred)
+        elif self.method == 'sasl':
             raise NotImplementedError("SASL authentication not yet implemented")
         
         return self
@@ -51,4 +51,4 @@ if __name__ == '__main__':
         auth='simple', #Allowed values are ['simple','sasl']
         )
         
-    l = ldaptor(**ldap_config)
+    l = ldapter(**ldap_config)
