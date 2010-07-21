@@ -1,0 +1,12 @@
+{% extends base.html %}
+
+{% block body %}
+
+    {{name}}
+
+    {% for key, value in data.items() %}
+        <b>{{key}}</b>:<i>{{value}}</i>
+        <br/><br/>
+    {% end %}
+    
+{% end %}
