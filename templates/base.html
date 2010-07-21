@@ -5,6 +5,21 @@
         <link rel="stylesheet" href="/static/style.css" type="text/css" media="screen" />
     </head>
     <body>
-        {% block body %}{% end %}
+
+        <div id="page">
+            <div id="header">
+                <a href="/">Sen Book</a>
+            </div>
+            <div id="content">
+                {% block body %}{% end %}
+            </div>
+            <div id="footer">
+                <ul id="footer_list" class="plainlist">
+                    <li><a href="http://www.nysenate.gov/">nysenate.gov</a></li>
+                    <li><a href="/">legal info</a></li>
+                    <li><a href="/">other stuff</a></li>
+                </ul>
+            </div>
+        </div>
     </body>
 </html>
