@@ -7,19 +7,20 @@ import tornado.httpserver
 from database import Database
 from settings import settings
 from ldapter import ldapter
-from handlers import MainHandler,PersonHandler
+from handlers import MainHandler,PersonHandler,GroupHandler
 
 
 # Create, Configure, and Connect to couchdb, store connection in settings
 settings['db'] = Database(**settings['db_settings']).configure().connect()
 
 # Create, Configure, and Connect to ldap, store conncetion in settings
-settings['ldap'] = ldapter(**settings['ldap_settings']).connect()
+settings['ldap'] = ldapter(**settings['ldap_settings'])
 
 #Configure the URL routing and create the application from settings
 application = tornado.web.Application([
         (r'/', MainHandler),
-        (r'/person/([A-Z\+\%\._\-a-z0-9]+)/?', PersonHandler),
+        (r'/person/([A-Z\+\%\*\._\-a-z0-9]+)/?', PersonHandler),
+        (r'/group/([A-Z\+\%\*\._\-a-z0-9]+)/?', GroupHandler),
     ], **settings)
 
 #Create a server for our application
