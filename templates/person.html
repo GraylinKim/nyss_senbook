@@ -3,10 +3,19 @@
 {% block body %}
 
     {{name}}
-
+    <br/><br/>
     {% for key, value in data.items() %}
-        <b>{{key}}</b>:<i>{{value}}</i>
-        <br/><br/>
+        {% if key in ['title','cn','location','mail','telephonenumber','l','st',] %}
+            <b>{{key}}</b>:<i>{{value[0]}}</i>
+            <br/><br/>
+        {% end %}
     {% end %}
     
+    Number of Groups: {{len(groups)}}
+    <br/><br/>
+    <ul class="plainlist" >
+    {% for cn, info in groups %}
+        <li><a {{'href="/group/%s"' % cn[3:]}} >{{info['cn'][0]}}</a> ({{len(info['member'])}} members)<br/>
+    {% end %}
+    </ul>    
 {% end %}
