@@ -13,9 +13,10 @@ body { background: blue; }
 
 #content { padding:10px; min-height:400px;}
 
-#footer { margin:0px auto; background:teal; border-top:4px solid black; }
+#footer { margin:0px auto; background:white; border-top:4px solid black; padding:20px;}
 
 #footer_list li { float:left; padding-right:40px; width:160px; }
 
 .bigger { font-size: 150% }
 .plainlist { list-style:none; }
+.clear { clear:both; }
