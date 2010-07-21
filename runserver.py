@@ -7,9 +7,13 @@ import tornado.httpserver
 from database import Database
 from settings import settings
 from handlers import MainHandler
+from ldapter import ldapter
 
 # Create, Configure, and Connect to couchdb, store connection in settings
 settings['db'] = Database(**settings['db_settings']).configure().connect()
+
+# Create, Configure, and Connect to ldap, store conncetion in settings
+settings['ldap'] = ldapter(**settings['ldap_settings']).connect()
 
 #Configure the URL routing and create the application from settings
 application = tornado.web.Application([
