@@ -1,0 +1,19 @@
+{% extends base.html %}
+
+{% block body %}
+
+    {% for key, value in data.items() %}
+        {% if key in ['displayname','mail'] %}
+            <b>{{key}}</b>:<i>{{value[0]}}</i>
+            <br/><br/>
+        {% end %}
+        
+        Number of Members: {{len(data['member'])}}
+        <ul class="plainlist">
+        {% for member in data['member'] %}
+            <li><a {{'href="/person/%s"' % getname(member)}}>{{getname(member)}}</a></li>
+        {% end %}
+        </ul>
+    {% end %}
+
+{% end %}
