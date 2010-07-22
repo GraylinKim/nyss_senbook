@@ -2,5 +2,17 @@
 
 {% block body %}
 
+{{len(results)}} Results for '{{term}}'
+<br/><br/>
+{% for result in results %}
+    <b>{{getname(result[0])}}</b>:<br/>
+    {% for key,value in result[1].items() %}
+        {% if key in ['telephonenumber','mail','department','l','st'] %}
+            {{key}}:<i>{{value}}</i>
+            <br/>
+        {% end %}
+    {% end %}
+    <br/><br/>
+{% end %}
 
 {% end %}

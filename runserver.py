@@ -7,7 +7,7 @@ import tornado.httpserver
 from database import Database
 from settings import settings
 from ldapter import ldapter
-from handlers import MainHandler,PersonHandler,GroupHandler, LoginHandler, LogoutHandler
+from handlers import MainHandler,PersonHandler,GroupHandler, LoginHandler, LogoutHandler, SearchHandler, SearchRouter
 
 
 # Create, Configure, and Connect to couchdb, store connection in settings
@@ -21,8 +21,10 @@ application = tornado.web.Application([
         (r'/', MainHandler),
         (r'/person/([A-Z\+\%\*\._\-a-z0-9]+)/?', PersonHandler),
         (r'/group/([A-Z\+\%\*\._\-a-z0-9]+)/?', GroupHandler),
-        (r'/login', LoginHandler ),
-        (r'/logout', LogoutHandler ),
+        (r'/search/?', SearchRouter ),
+        (r'/search/(.+?)/(.+?)/?', SearchHandler ),
+        (r'/login/?', LoginHandler ),
+        (r'/logout/?', LogoutHandler ),
     ], **settings)
 
 #Create a server for our application

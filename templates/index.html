@@ -2,6 +2,11 @@
 
 {% block body %}
 
-HelloWorld
+<form method="POST" action="/search">
+    <input type="text" name="term" id="term" />
+    <br/><br/>
+    <input type="submit" name="group" value="Search Groups" />
+    <input type="submit" name="person" value="Search People" />
+</form>
 
 {% end %}
