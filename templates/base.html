@@ -3,40 +3,22 @@
     <head>
         <title>{{title}}</title>
         <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js" ></script>
-        <script type="text/javascript">
-        $(document).ready(function(){
-            
-            $("#login_form").hide();
-            
-            $("#login_toggle").toggle(
-                function() {
-                    $(this).html("(hide)");
-                    $("#login_form").show();
-                },
-                function() {
-                    $(this).html("(show)");
-                    $("#login_form").hide();
-                }
-            );
-        });
-        </script>
         <link rel="stylesheet" href="/static/style.css" type="text/css" media="screen" />
     </head>
     <body>
-        <div id="page">
-            <div id="header">
-                <a href="/" class="title">Sen Book</a>
-                
-                <div id="accountbox">
-                    Log in <span id="login_toggle">(show)</span>
-                    <form id="login_form" method="POST" action="ajax/login">
-                        <input type="text" name="who" id="who" /><br/>
-                        <input type="password" name="cred" id="cred" /><br/>
-                        <input type="submit" value="Login" />
-                    </form>
-                </div>
-                <div class="clear" ></div>
+        <div id="header">
+            <a href="/" class="title">Sen Book</a>
+            <div id="accountbox">
+                {% if user == None %}
+                    <a href="/login">Log in here</a>
+                {% else %}
+                    Logged in as {{user}}.<br/>
+                    Click to <a href="/logout">log out</a>
+                {% end %}
             </div>
+            <div class="clear" ></div>
+        </div>
+        <div id="page">
             <div id="content">
                 {% block body %}{% end %}
             </div>

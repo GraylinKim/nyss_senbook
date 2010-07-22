@@ -42,6 +42,14 @@ class ldapter(object):
         
         return self
         
+    def simple_auth(self,who,cred):
+        try:
+            self.server = ldap.initialize(self.url)
+            self.server.simple_bind_s(who,cred)
+            return True
+        except ldap.InvalidCredentials as e:
+            return False
+            
 if __name__ == '__main__':
     
     ldap_config = dict(
