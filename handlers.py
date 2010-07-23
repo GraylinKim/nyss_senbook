@@ -1,9 +1,13 @@
-import tornado.web
+from tornado.web import authenticated,RequestHandler
 from settings import settings
 from ldapter import ldapter
+from person import Person
 import urllib
 
-class BaseHandler(tornado.web.RequestHandler):
+def normalizeName(user):
+    return ''.join(re.match(r'(\w+)( |%20|\+)(\w+)',user).groups()[0:3:2]).lower()
+    
+class BaseHandler(RequestHandler):
     """A Base Handle for adding global functionality at a later point"""
     
     def get_current_user(self):
@@ -17,6 +21,8 @@ class BaseHandler(tornado.web.RequestHandler):
             user=self.current_user,
             message=None,
             getname=lambda x: x.split(',')[0][3:],
+            settings=settings,
+            url=self.request.path,
         ).items() + kwargs.items())
         
         super(BaseHandler,self).render(template_name, **options)
@@ -30,27 +36,42 @@ class MainHandler(BaseHandler):
 class PersonHandler(BaseHandler):
     def get(self,user):
         try:
-            user = urllib.unquote_plus(user)
-            
-            server = settings['ldap'].connect()
-            filterstr = '(&(cn=%s)(objectClass=dominoPerson))' % user
-            ident, data = server.get(filterstr)
-            
-            name = data.pop('cn',[ident,])[0]
-            
-            filterstr = '(&(member=%s)(objectClass=dominoGroup))' % ident
-            groups = [result for result in server.search(filterstr)]
-            
-            self.render(
-                'templates/person.html',
-                title="%s - Profile" % name,
-                data=data,
-                name=name,
-                groups=groups
-            )
-            
+            person = Person(urllib.unquote_plus(user))
         except StopIteration as e:
             self.render('templates/nomatch.html',title="No Such Person")
+            return
+        
+        if self.current_user == person.name:
+            self.render(
+                'templates/edit_person.html',
+                title="Editing %s - Profile" % person.name,
+                person=person)
+        else:
+            self.render(
+                'templates/person.html',
+                title="%s - Profile" % person.name,
+                person=person,)
+    
+    @authenticated
+    def post(self,user):
+        person = Person(urllib.unquote_plus(user))
+        
+        args = self.request.arguments
+        files = self.request.files
+        if 'avatar' in files:
+            avatar = files['avatar'][0]
+            filename = '%s.%s' % (''.join(person.name.split()),avatar['filename'].split('.')[-1])
+            person.data['avatar'] = settings['avatars']+filename
+            with open(settings['server_root']+'static/'+person.data['avatar'],'w') as outfile:
+                outfile.write(avatar['body'])
+        
+        if 'aboutme' in args:
+            person.data['aboutme'] = args.get('aboutme')
+            
+        person.save()
+        self.redirect('')
+        return
+        
         
 class GroupHandler(BaseHandler):
     def get(self,group):
@@ -67,7 +88,7 @@ class GroupHandler(BaseHandler):
                 name=name,)
                 
         except StopIteration as e:
-            self.render('templates/nomatch.html',title="No Such Group")
+            self.render('templates/no_match.html',title="No Such Group")
 
 ################################################################################
 # Search Handlers
@@ -135,5 +156,7 @@ class LogoutHandler(BaseHandler):
         if self.current_user:
             self.clear_cookie("uid")
             self.clear_cookie("uname")
-            
-        self.redirect("/")
+        if 'ret' in self.request.arguments:
+            self.redirect(self.request.arguments['ret'][0].replace(' ','+'))
+        else:
+            self.redirect("/")

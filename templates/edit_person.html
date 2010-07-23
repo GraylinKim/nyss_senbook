@@ -1,0 +1,22 @@
+{% extends person.html %}
+
+{% block contents %}
+
+
+<div id="profile_editor">
+    Edit Your Profile Here.
+    <br/><br/>
+    Submit Changes to view your updated profile, don't worry, no changes are permanent.
+    <br/><br/>
+    Please logout when you are done submitting changes.
+    
+    <form method="post" enctype="multipart/form-data" action="" >
+        Change your avatar image: <input type="file" name="avatar" />
+        <br/><br/>
+        Tell us a bit about yourself:<br/>
+        <textarea name="aboutme" cols="60" rows="10" >{{person.data.get('aboutme',[""])[0]}}</textarea>
+        <br/><br/>
+        <input type="submit" value="Submit Changes" id="submitform" />
+    </form>
+</div>
+{% end %}

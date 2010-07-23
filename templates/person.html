@@ -1,21 +1,68 @@
 {% extends base.html %}
 
 {% block body %}
-
-    {{name}}
-    <br/><br/>
-    {% for key, value in data.items() %}
-        {% if key in ['title','cn','location','mail','telephonenumber','l','st',] %}
-            <b>{{key}}</b>:<i>{{value[0]}}</i>
-            <br/><br/>
+    <div id="profile_header">
+        <img id="profile_gmap" src="http://maps.google.com/maps/api/staticmap?maptype=terrain&center=42.75,-76&zoom=5&size=190x170&sensor=false" />
+        <div id="profile_avatar" >
+            {% if 'avatar' in person.data %}
+                <img src="{{static_url(person.data['avatar'])}}" />
+            {% end %}
+        </div>
+        <div id="profile_overview">
+            <div class="profile_name">{{person.name}}</div>
+            {% if person.data.get('title') %}
+                <div class="profile_title">{{person.data['title'][0]}}</div>
+            {% end %}
+            <br/>
+            {% if person.data.get('telephonenumber') %}
+                <div class="profile_phone">Phone: {{person.data['telephonenumber'][0]}}</div>
+            {% end %}
+            {% if person.data.get('mail') %}
+                <div class="profile_email">Email:
+                    <a {{'href="mailto:%s"' % person.data.get('mail')[0]}}>
+                        {{person.data['mail'][0]}}
+                    </a>
+                </div>
+            {% end %}
+            {% if person.data.get('l') and person.data.get('st') %}
+                <div class="profile_location">
+                    Location: {{"%s, %s" % (person.data['l'][0],person.data['st'][0])}}
+                </div>
+            {% end %}
+        </div>
+        <div class="clear"> </div>
+    </div>
+    <div class="clear"></div>
+    
+    {% block contents %}
+    <div id="profile_sidebar">
+    
+        <div id="profile_projects">
+            Projects I am part of:
+            <ul class="profile_list">
+                <li>Redmine Projects</li>
+                <li>Will go in here</li>
+            </ul>
+        </div>
+        <div id="profile_groups">
+        
+            Groups I am part of ({{len(person.data['groups'])}} total):
+            <ul class="profile_list">
+            {% for cn, info in person.data['groups'] %}
+                <li><a {{'href="/group/%s"' % cn[3:]}} >{{info['cn'][0]}}</a><br/>
+            {% end %}
+            </ul>
+            
+        </div>
+        
+    </div>
+    <div id="profile_content">
+        {% if 'aboutme' in person.data %}
+            <div id="profile_aboutme">
+                {{person.data['aboutme'][0]}}
+            </div>
         {% end %}
+    </div>
     {% end %}
     
-    Number of Groups: {{len(groups)}}
-    <br/><br/>
-    <ul class="plainlist" >
-    {% for cn, info in groups %}
-        <li><a {{'href="/group/%s"' % cn[3:]}} >{{info['cn'][0]}}</a> ({{len(info['member'])}} members)<br/>
-    {% end %}
-    </ul>    
 {% end %}

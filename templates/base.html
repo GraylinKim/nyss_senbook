@@ -7,30 +7,36 @@
     </head>
     <body>
         <div id="header">
-            <a href="/" class="title">Sen Book</a>
             <div id="accountbox">
                 {% if user == None %}
-                    <a href="/login">Log in here</a>
+                    <a href="/login?ret={{url}}">Log in here</a>
                 {% else %}
-                    Logged in as {{user}}.<br/>
-                    Click to <a href="/logout">log out</a>
+                    Logged in as <b>{{user}}</b><br/>
+                    Click to <a href="/logout?ret={{url}}">log out</a>
                 {% end %}
+            </div>
+            <div id="banner">
+                <a href="nysenate.gov" class="plain"><div id="nyss_logo">NY Senate</div></a>
+                <div id="nyss_slogan">Your slogan fits nicely<br/>right here!</div>
+                <div class="clear" ></div>
             </div>
             <div class="clear" ></div>
         </div>
         <div id="page">
             <div id="content">
                 {% block body %}{% end %}
+                <div class="clear" ></div>
             </div>
-            <div id="footer">
-                <ul id="footer_list" class="plainlist">
-                    <li><a href="http://www.nysenate.gov/">nysenate.gov</a></li>
-                    <li><a href="/">legal info</a></li>
-                    <li><a href="/">other stuff</a></li>
-                </ul>
+            <div class="clear" ></div>
+        </div>
+        <div id="footer">
+            <ul id="footer_list" class="plainlist">
+                <li>| <a href="http://www.nysenate.gov/">nysenate.gov</a> |</li>
+                <li>| <a href="/">legal info</a> |</li>
+                <li>| <a href="/">other stuff</a> |</li>
                 <div class="clear"></div>
-            </div>
-            
+            </ul>
+            <span id="copyright">(C) Awesome stuff 2010</span>
         </div>
     </body>
 </html>

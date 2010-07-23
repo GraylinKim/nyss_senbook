@@ -1,24 +1,67 @@
-html, body, div, li, ul, ol, span, form, input { margin:0px; padding:0px; }
+/*******************************************************************************
+CSS Reset *********************************************************************/
 
-a { color:black; text-decoration:none; border-bottom:1px black dashed; }
-a:hover { border-bottom:1px black solid; }
+html, body, div, li, ul, ol, span, form, input { margin:0px; padding:0px; }
+ul, ol { list-style:none; }
+
+/*******************************************************************************
+Link Decoration ***************************************************************/
+
+a { color:royalblue; text-decoration:none; }
+a:hover { cursor:pointer; }
+
+
+/*******************************************************************************
+General Use Classes ***********************************************************/
+
+.clear { clear:both; }
+.plain { color:inherit; }
+
+/*******************************************************************************
+Base.html styles **************************************************************/
 
 html, body {width:100%; height:100%;}
 
-#page { width:800px; min-height:100%; margin:0px auto;}
+#header { padding:10px 10px 50px 10px; width:1000px; margin:0px auto;}
+    #banner { }
+        #nyss_logo { float:left; font-variant:small-caps; font-size:36px; padding-right:20px;}
+        #nyss_slogan { float:left; font-style:italic; font-size:21px; }
+        
+    #accountbox { float:right; text-align:right; }
 
-#header { background:white; padding:20px 20px 20px 50px; border-bottom:4px solid black;}
+#page { margin:0px auto; width:1000px;}
+    #content { border:2px solid black; }
 
-.title { font-variant:small-caps; font-size:48px; line-height:70px; }
-#content { padding:10px; min-height:400px;}
+#footer { width:1000px; margin:0px auto; padding:25px 25px 25px 25px; }
+    #footer_list { padding:10px 0px;}
+        #footer_list li { float:left; padding-right:25px;}
+    #copyright { font-style:italic; }
 
-#footer { margin:0px auto; background:white; border-top:4px solid black; padding:20px;}
 
-#footer_list li { float:left; padding-right:40px; width:160px; }
+/*******************************************************************************
+Person.html styles ************************************************************/
 
-#accountbox { float:right; text-align:right; }
+.profile_list { margin:10px 0px 10px 30px; }
 
-.bigger { font-size: 150% }
-.plainlist { list-style:none; }
-.left { float:left; }
-.clear { clear:both; }
+#profile_header { padding:10px; border-bottom:2px solid black; }
+    #profile_avatar { float:left; margin:0px 0px 0px 0px; width:175px; height:225px; border:2px solid blue; }
+        #profile_avatar img { width:175px; height:225px; float:left; }
+    #profile_overview { float:left; margin-left:20px; }
+        .profile_name { font-size:36px; }
+        .profile_title { font-size:24px; }
+        .profile_email { font-size:16px; }
+        .profile_phone { font-size:16px; }
+    #profile_gmap { float:right; border:2px solid black; width:275px; height:225px; }
+    
+#profile_content { padding:20px; }
+    #profile_aboutme { padding:20px 0px; }
+    
+    #profile_sidebar { float:right; padding: 10px; width:280px; border-left:2px solid black; height:500px;}
+        #profile_projects { }
+        #profile_groups { }
+    
+    #profile_editor { padding:20px; }
+        #profile_editor form { padding:20px 0px 20px 10px; }
+            #submitform { margin-top:20px; }
+            
+    

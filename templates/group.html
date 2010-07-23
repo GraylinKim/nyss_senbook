@@ -2,18 +2,25 @@
 
 {% block body %}
 
-    {% for key, value in data.items() %}
-        {% if key in ['displayname','mail'] %}
-            <b>{{key}}</b>:<i>{{value[0]}}</i>
-            <br/><br/>
-        {% end %}
-    {% end %}
+    <div id="profile_header">
+        <div id="profile_overview">
+            <div class="profile_name">{{data['displayname'][0]}}</div>
+            <div class="profile_email">Email: <a {{'href="mailto:%s"' % data['mail'][0]}}>{{data['mail'][0]}}</a></div>
+        </div>
+        <div id="profile_avatar" ></div>
+    </div>
     
-    Number of Members: {{len(data['member'])}}
-    <ul class="plainlist">
-    {% for member in data['member'] %}
-        <li><a {{'href="/person/%s"' % getname(member)}}>{{getname(member)}}</a></li>
-    {% end %}
-    </ul>
+    <div id="profile_content">
+        
+        <div id="profile_groups">
+        
+            Members of this group ({{len(data['member'])}} total):
+            <ul class="profile_list">
+            {% for member in data['member'] %}
+                <li><a {{'href="/person/%s"' % getname(member)}}>{{getname(member)}}</a></li>
+            {% end %}
+            </ul>
+        </div>
+    </div>
 
 {% end %}
