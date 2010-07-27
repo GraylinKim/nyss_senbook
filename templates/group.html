@@ -3,11 +3,15 @@
 {% block body %}
 
     <div id="profile_header">
+        <div id="profile_avatar" ></div>
         <div id="profile_overview">
             <div class="profile_name">{{data['displayname'][0]}}</div>
-            <div class="profile_email">Email: <a {{'href="mailto:%s"' % data['mail'][0]}}>{{data['mail'][0]}}</a></div>
+            {% if 'mail' in data %}
+                <div class="profile_email">Email: <a {{'href="mailto:%s"' % data['mail'][0]}}>{{data['mail'][0]}}</a></div>
+            {% end %}
         </div>
-        <div id="profile_avatar" ></div>
+        
+        <div class="clear"></div>
     </div>
     
     <div id="profile_content">
