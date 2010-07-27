@@ -4,17 +4,22 @@ import tornado.web
 import tornado.ioloop
 import tornado.httpserver
 
-from database import Database
+from handlers import *
 from settings import settings
-from ldapter import ldapter
-from handlers import MainHandler,PersonHandler,GroupHandler, LoginHandler, LogoutHandler, SearchHandler, SearchRouter
+from database import Couch,Ldap,Mysql
 
 
 # Create, Configure, and Connect to couchdb, store connection in settings
-settings['db'] = Database(**settings['db_settings']).configure().connect()
+if 'couch_settings' in settings:
+    settings['couch'] = Couch(**settings['couch_settings'])
+
+# Create, Configure, and Connect to couchdb, store connection in settings
+if 'mysql_settings' in settings:
+    settings['mysql'] = Mysql(**settings['mysql_settings'])
 
 # Create, Configure, and Connect to ldap, store conncetion in settings
-settings['ldap'] = ldapter(**settings['ldap_settings'])
+if 'ldap_settings' in settings:
+    settings['ldap'] = Ldap(**settings['ldap_settings'])
 
 #Configure the URL routing and create the application from settings
 application = tornado.web.Application([
@@ -27,12 +32,14 @@ application = tornado.web.Application([
         (r'/logout/?', LogoutHandler ),
     ], **settings)
 
-#Create a server for our application
-http_server = tornado.httpserver.HTTPServer(application)
-
-#Give it a port to listen on, from settings
-http_server.listen(settings['port'])
 
 if __name__ == '__main__':
+
+    #Create a server for our application
+    http_server = tornado.httpserver.HTTPServer(application)
+
+    #Give it a port to listen on, from settings
+    http_server.listen(settings['port'])
+    
     # start the tornado application
     tornado.ioloop.IOLoop.instance().start()

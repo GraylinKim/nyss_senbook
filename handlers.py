@@ -1,6 +1,5 @@
 from tornado.web import authenticated,RequestHandler
 from settings import settings
-from ldapter import ldapter
 from person import Person
 import urllib
 

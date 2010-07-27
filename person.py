@@ -2,7 +2,7 @@ from settings import settings
 
 class Person(object):
     def __init__(self,name):
-        db = settings['db']
+        db = settings['couch'].connect()
         ldap = settings['ldap'].connect()
         
         filterstr = '(&(cn=%s)(objectClass=dominoPerson))' % name
@@ -31,10 +31,10 @@ class Person(object):
             return default
     
     def save(self):
-        if self.id in settings['db']:
-            doc = settings['db'][self.id]
+        if self.id in settings['couch']:
+            doc = settings['couch'][self.id]
             for key,value in self.__dict__.iteritems():
                 doc[key] = value
-            settings['db'][self.id] = doc
+            settings['couch'][self.id] = doc
         else:
-            settings['db'][self.id]=self.__dict__
+            settings['couch'][self.id]=self.__dict__
