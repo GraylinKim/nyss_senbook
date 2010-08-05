@@ -143,14 +143,9 @@ class Person(object):
             outfile.write(avatar['body'])        
     
 def fromId(uid):
+    results = list()
     uid = urllib.unquote_plus(uid)
     print "Person.fromId( %s )" % uid
-    
-    results = list()
-    try:
-        results.extend(LdapPerson.getRecords('uid',uid))
-    except RecordLoadError as e:
-        print repr(e)
         
     try:
         results.extend(CouchPerson.getRecords('by_uid',uid))
@@ -162,17 +157,17 @@ def fromId(uid):
     except RecordLoadError as e:
         print repr(e)
         
+    try:
+        results.extend(LdapPerson.getRecords('uid',uid))
+    except RecordLoadError as e:
+        print repr(e)
+        
     return reducePeople(results)
         
 def fromName(name):
+    results = list()
     name = urllib.unquote_plus(name)
     print "Person.fromName( %s )" % name
-    
-    results = list()
-    try:
-        results.extend(LdapPerson.getRecords('cn',name))
-    except RecordLoadError as e:
-        print repr(e)
         
     try:
         results.extend(CouchPerson.getRecords('by_name',name))
@@ -182,6 +177,11 @@ def fromName(name):
     try:
         parts = name.split()
         results.extend(RedminePerson.getRecords('firstname=%s and lastname=%s',(parts[0],parts[-1])))
+    except RecordLoadError as e:
+        print repr(e)
+    
+    try:
+        results.extend(LdapPerson.getRecords('cn',name))
     except RecordLoadError as e:
         print repr(e)
         

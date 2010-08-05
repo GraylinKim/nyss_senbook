@@ -1,18 +1,12 @@
 from tornado.web import authenticated,RequestHandler
 from settings import settings
-from people import Person,fromName,fromId
+from people import Person,fromName,fromId,authenticate,getNameFromUID
 from project import Project
 from group import Group
-import urllib
+from urllib import quote_plus, unquote_plus
 
 ################################################################################
-# Do I even use this?
 
-def normalizeName(user):
-    return ''.join(re.match(r'(\w+)( |%20|\+)(\w+)',user).groups()[0:3:2]).lower()
-
-################################################################################
-            
 class BaseHandler(RequestHandler):
     """A Base Handle for adding global functionality at a later point"""
     
@@ -48,7 +42,9 @@ class PersonIdRouter(BaseHandler):
         elif len(people)!=1:
             self.render('templates/whichperson.html',title="Mutple Matches",people=people)
         else: #len(people)==1:
-            self.redirect(r'/person/%s %s (%s)' % (people[0].data['givenname'],people[0].data['sn'],uid))
+            person = people[0]
+            args = (person.name,uid)
+            self.redirect(quote_plus( '/person/%s (%s)' % args ,'+()/' ))
             
 class PersonNameRouter(BaseHandler):
     def get(self,name):
@@ -58,7 +54,9 @@ class PersonNameRouter(BaseHandler):
         elif len(people)!=1:
             self.render('templates/whichperson.html',title="Mutiple Matches",people=people)
         else: #len(people)==1:
-            self.redirect(r'/person/%s (%s)' % (name,people[0].data['uid']))
+            person = people[0]
+            args = (unquote_plus(name),person.data['uid'])
+            self.redirect(quote_plus( '/person/%s (%s)' % args ,'+()/' ))
         
 class PersonHandler(BaseHandler):
     def get(self,name,uid):
@@ -102,7 +100,7 @@ class GroupHandler(BaseHandler):
     def get(self,name):
         
         try:
-            group = Group(urllib.unquote_plus(name))
+            group = Group(unquote_plus(name))
             self.render('templates/group.html',
                 title="%s - Profile" % group.data['displayname'],
                 data=group.data,
@@ -113,7 +111,7 @@ class GroupHandler(BaseHandler):
 
 class ProjectHandler(BaseHandler):
     def get(self,project):
-        project = Project(urllib.unquote_plus(project))
+        project = Project(unquote_plus(project))
         self.render('templates/project.html',
             title="Project %s" % project,
             project = project)
@@ -152,7 +150,7 @@ class LoginHandler(BaseHandler):
         
     def get(self):
         if self.current_user:
-            self.redirect('/person/%s' % urllib.quote_plus(self.current_user))
+            self.redirect('/person/%s' % quote_plus(self.current_user))
         else:
             self.render('templates/login.html',title="Login")
         
@@ -160,11 +158,11 @@ class LoginHandler(BaseHandler):
         who = self.get_argument("who")
         cred = self.get_argument("cred")
         
-        if Person.authenticate(who,cred):
-            name = Person.getNameFromUID(who)
+        if authenticate(who,cred):
+            name = getNameFromUID(who)
             self.set_secure_cookie("uid",who)
             self.set_secure_cookie("uname",name)
-            self.redirect('/person/%s' % urllib.quote_plus(name))
+            self.redirect('/person/%s' % quote_plus(name))
         else:
             self.render('templates/login.html',
                 title="Login",
