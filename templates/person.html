@@ -35,13 +35,28 @@
     <div class="clear"></div>
     
     {% block contents %}
-    <div id="profile_sidebar">
-    
+
+    <!--<div id="profile_sidebar"></div>-->
+    <div id="profile_content">
+        {% if 'aboutme' in person.data %}
+            <div id="profile_aboutme">
+                {{person.data['aboutme'][0]}}
+            </div>
+        {% end %}
         <div id="profile_projects">
-            Projects I am part of:
+            Redmine Projects:
             <ul class="profile_list">
-                <li>Redmine Projects</li>
-                <li>Will go in here</li>
+                {% if 'projects' in person.data %}
+                    {% for project in person.data['projects'] %}
+                    <li>
+                        <a {{'href="/project/%s"' % project['name']}} >
+                            {{project['name']}}
+                        </a> - (<i>{{project['role']}}</i>)
+                    </li>
+                    {% end %}
+                {% else %}
+                    <li>None</li>
+                {% end %}
             </ul>
         </div>
         <div id="profile_groups">
@@ -54,14 +69,6 @@
             </ul>
             
         </div>
-        
-    </div>
-    <div id="profile_content">
-        {% if 'aboutme' in person.data %}
-            <div id="profile_aboutme">
-                {{person.data['aboutme'][0]}}
-            </div>
-        {% end %}
     </div>
     {% end %}
     

@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block body %}
+
+    {% for person in people %}
+        {{person.name}}<br/><br/>
+        {{person.data.get('displayname',[''])[0]}}<br/>
+        {{person.data.get('mail',[''])[0]}}<br/>
+        {{person.data.get('l',[''])[0]}}, {{person.data.get('st',[''])[0]}}<br/>
+        <br/>
+    {% end %}
+
+{% end %}

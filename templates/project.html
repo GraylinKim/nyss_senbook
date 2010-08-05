@@ -1,0 +1,53 @@
+{% extends base.html %}
+
+{% block body %}
+    <div id="profile_header">
+        <div id="profile_overview">
+            <div class="profile_name">{{project.data['name']}}</div>
+            {% if project.data['parentproject']['name'] %}
+                <div>
+                    Parent Project - 
+                    <a {{'href="/project/%s"' % project.data['parentproject']['name']}}>
+                        {{project.data['parentproject']['name']}}
+                    </a>
+                </div>
+            {% end %}
+            <div>Child Projects:            
+                {% for child in project.data['childprojects'] %}
+                    <ul id="childprojects" class="plainlist">
+                        <li>
+                            |<a {{'href="/project/%s"' % child['name']}}>
+                                {{child['name']}}
+                            </a>|
+                        </li>
+                    </ul>
+                {% end %}
+            </div>
+        </div>
+        <div class="clear"> </div>
+    </div>
+    <div class="clear"></div>
+    
+    {% block contents %}
+
+    <!--<div id="profile_sidebar"></div>-->
+    <div id="profile_content">
+        <div id="profile_aboutme">
+            {{project.data['description']}}
+        </div>
+        <div>Members
+        {% for member in project.data['members'] %}
+            <ul class="plainlist">
+                <li>
+                    <a {{'href="/person/%s"' % member['name']}}>
+                        {{member['name']}}
+                    </a>
+                </li>
+            </ul>
+        {% end %}
+        </div>
+    </div>
+    
+    {% end %}
+    
+{% end %}

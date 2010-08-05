@@ -6,32 +6,26 @@ import tornado.httpserver
 
 from handlers import *
 from settings import settings
-from database import Couch,Ldap,Mysql
-
-
-# Create, Configure, and Connect to couchdb, store connection in settings
-if 'couch_settings' in settings:
-    settings['couch'] = Couch(**settings['couch_settings'])
-
-# Create, Configure, and Connect to couchdb, store connection in settings
-if 'mysql_settings' in settings:
-    settings['mysql'] = Mysql(**settings['mysql_settings'])
-
-# Create, Configure, and Connect to ldap, store conncetion in settings
-if 'ldap_settings' in settings:
-    settings['ldap'] = Ldap(**settings['ldap_settings'])
 
 #Configure the URL routing and create the application from settings
+
+word = r'[A-Za-z\-\.]+'
+space = r'[\+\%0-9 ]+'
+sep = r'[\+\%0-9 ]*'
+uid = r'[a-z]+'
+
 application = tornado.web.Application([
         (r'/', MainHandler),
-        (r'/person/([A-Z\+\%\*\._\-a-z0-9]+)/?', PersonHandler),
+        (r'/person/(%s)' % uid, PersonIdRouter),
+        (r'/person/(%s%s%s)' % (word,space,word), PersonNameRouter),
+        (r'/person/(%s%s%s)%s\((%s)\)/?' % (word,space,word,sep,uid), PersonHandler),
         (r'/group/([A-Z\+\%\*\._\-a-z0-9]+)/?', GroupHandler),
+        (r'/project/([A-Z\+\%\*\._\-a-z0-9]+)/?', ProjectHandler),
         (r'/search/?', SearchRouter ),
         (r'/search/(.+?)/(.+?)/?', SearchHandler ),
         (r'/login/?', LoginHandler ),
         (r'/logout/?', LogoutHandler ),
     ], **settings)
-
 
 if __name__ == '__main__':
 

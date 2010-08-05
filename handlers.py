@@ -1,11 +1,18 @@
 from tornado.web import authenticated,RequestHandler
 from settings import settings
-from person import Person
+from people import Person,fromName,fromId
+from project import Project
+from group import Group
 import urllib
+
+################################################################################
+# Do I even use this?
 
 def normalizeName(user):
     return ''.join(re.match(r'(\w+)( |%20|\+)(\w+)',user).groups()[0:3:2]).lower()
-    
+
+################################################################################
+            
 class BaseHandler(RequestHandler):
     """A Base Handle for adding global functionality at a later point"""
     
@@ -25,70 +32,92 @@ class BaseHandler(RequestHandler):
         ).items() + kwargs.items())
         
         super(BaseHandler,self).render(template_name, **options)
+        
+################################################################################
 
 class MainHandler(BaseHandler):
     def get(self):
-        self.render(
-            'templates/index.html',
-            title='Search for your NY Senate Homies')
+        self.render('templates/index.html',
+            title='Search for your NY Senate Workers')
 
+class PersonIdRouter(BaseHandler):
+    def get(self,uid):
+        people = fromId(uid)
+        if len(people)==0:
+            self.render('templates/noperson.html',title="No Such Person")
+        elif len(people)!=1:
+            self.render('templates/whichperson.html',title="Mutple Matches",people=people)
+        else: #len(people)==1:
+            self.redirect(r'/person/%s %s (%s)' % (people[0].data['givenname'],people[0].data['sn'],uid))
+            
+class PersonNameRouter(BaseHandler):
+    def get(self,name):
+        people = fromName(name)
+        if len(people)==0:
+            self.render('templates/noperson.html',title="No Such Person")
+        elif len(people)!=1:
+            self.render('templates/whichperson.html',title="Mutiple Matches",people=people)
+        else: #len(people)==1:
+            self.redirect(r'/person/%s (%s)' % (name,people[0].data['uid']))
+        
 class PersonHandler(BaseHandler):
-    def get(self,user):
-        try:
-            person = Person(urllib.unquote_plus(user))
-        except StopIteration as e:
-            self.render('templates/nomatch.html',title="No Such Person")
+    def get(self,name,uid):
+        people = fromId(uid)
+        if len(people)==0:
+            self.render('templates/noperson.html',title="No Such Person")
+            return
+        if len(people)!=1:
+            self.render('templates/whichperson.html',title="Mutple Matches",people=people)
             return
         
+        person = people[0]
         if self.current_user == person.name:
-            self.render(
-                'templates/edit_person.html',
+            self.render('templates/edit_person.html',
                 title="Editing %s - Profile" % person.name,
                 person=person)
         else:
-            self.render(
-                'templates/person.html',
+            self.render('templates/person.html',
                 title="%s - Profile" % person.name,
-                person=person,)
+                person=person)
     
     @authenticated
-    def post(self,user):
-        person = Person(urllib.unquote_plus(user))
+    def post(self,name,uid):
+        people = fromId(uid)
         
-        args = self.request.arguments
-        files = self.request.files
-        if 'avatar' in files:
-            avatar = files['avatar'][0]
-            filename = '%s.%s' % (''.join(person.name.split()),avatar['filename'].split('.')[-1])
-            person.data['avatar'] = settings['avatars']+filename
-            with open(settings['server_root']+'static/'+person.data['avatar'],'w') as outfile:
-                outfile.write(avatar['body'])
-        
-        if 'aboutme' in args:
-            person.data['aboutme'] = args.get('aboutme')
+        if len(person)==1:
+            person = people[0]
             
-        person.save()
+            args = self.request.arguments
+            files = self.request.files
+            if 'avatar' in files:
+                person.set_avatar(files['avatar'][0])
+            if 'aboutme' in args:
+                person.data['aboutme'] = args.get('aboutme')
+                
+            person.save()
+            
         self.redirect('')
-        return
-        
         
 class GroupHandler(BaseHandler):
-    def get(self,group):
+    def get(self,name):
         
         try:
-            server = settings['ldap'].connect()
-            group = urllib.unquote_plus(group)
-            filterstr = '(&(cn=%s)(objectClass=dominoGroup))' % group
-            name, data = server.search(filterstr).next()
-            self.render(
-                'templates/group.html',
-                title="%s - Profile" % name,
-                data=data,
-                name=name,)
+            group = Group(urllib.unquote_plus(name))
+            self.render('templates/group.html',
+                title="%s - Profile" % group.data['displayname'],
+                data=group.data,
+                name=group.id)
                 
         except StopIteration as e:
             self.render('templates/no_match.html',title="No Such Group")
 
+class ProjectHandler(BaseHandler):
+    def get(self,project):
+        project = Project(urllib.unquote_plus(project))
+        self.render('templates/project.html',
+            title="Project %s" % project,
+            project = project)
+            
 ################################################################################
 # Search Handlers
 
@@ -110,45 +139,36 @@ class SearchHandler(BaseHandler):
     def get(self,otype,term):
         server = settings['ldap'].connect()  
         filterstr = '(&(cn=*%s*)(objectClass=domino%s))' % (term,otype)
-        results = [result for result in server.search(filterstr)]
-        self.render(
-            'templates/search.html',
+        results = server.search(filterstr)
+        self.render('templates/search.html',
             title="%s Search Results (%s)" % (otype,len(results)),
             results = results,
-            term = term,)
+            term = term)
 
 ################################################################################
 # Login Handlers
 
 class LoginHandler(BaseHandler):
-    
-    def getUserName(self, who):
-        record = settings['ldap'].search("(uid=%s)" % who).next()
-        return record[1]['cn'][0]
         
     def get(self):
         if self.current_user:
-            name = self.current_user
-            self.redirect('/person/%s' % urllib.quote_plus(name))
+            self.redirect('/person/%s' % urllib.quote_plus(self.current_user))
         else:
-            self.render(
-                'templates/login.html',
-                title="Login",)
+            self.render('templates/login.html',title="Login")
         
     def post(self):
         who = self.get_argument("who")
         cred = self.get_argument("cred")
         
-        if settings['ldap'].simple_auth(who,cred):
-            name = self.getUserName(who)
+        if Person.authenticate(who,cred):
+            name = Person.getNameFromUID(who)
             self.set_secure_cookie("uid",who)
             self.set_secure_cookie("uname",name)
             self.redirect('/person/%s' % urllib.quote_plus(name))
         else:
-            self.render(
-                'templates/login.html',
+            self.render('templates/login.html',
                 title="Login",
-                message="Authentication Failed",)
+                message="Authentication Failed")
         
 class LogoutHandler(BaseHandler):
     def get(self):

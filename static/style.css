@@ -16,6 +16,7 @@ General Use Classes ***********************************************************/
 
 .clear { clear:both; }
 .plain { color:inherit; }
+.left { float:left; }
 
 /*******************************************************************************
 Base.html styles **************************************************************/
@@ -65,3 +66,5 @@ Person.html styles ************************************************************/
             #submitform { margin-top:20px; }
             
     
+    #childprojects { display:inline; }
+    #childprojects li { display:inline; padding:0px 5px;}

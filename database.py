@@ -13,7 +13,7 @@ class Couch(object):
         self.host=host
         self.name=name
         self.__dict__.update(kwargs)
-        self.configure(self)
+        self.configure()
         
     def connect(self):
         
@@ -31,26 +31,21 @@ class Couch(object):
     def configure(self):
         ''' define/update the views. note that the sync function will
         also update existing views.'''
-
         self.connect()
-        #Define the views here
+        
+        ViewDefinition('main','by_uid', '''
+            function(doc) {
+                emit(doc.uid, doc)
+            }
+            ''').sync(self.db)
+        
+        ViewDefinition('main','by_name','''
+            function(doc) {
+              emit(doc.name, doc);
+            }
+            ''').sync(self.db)
         
         return self
-
-
-################################################################################
-
-from MySQLdb import connect
-from MySQLdb.cursors DictCursor
-
-class MySQL(object):
-
-    def __init__(self,host,user,password,db,**kwargs):
-        self.host=host
-        self.user=user
-        self.password=password
-        self.db=db
-        self.__dict__.update(kwargs)
 
 ################################################################################
 
@@ -99,15 +94,71 @@ class Ldap(object):
         timeout = options.get('timeout', -1)
         all = options.get('all',0)
         
+        print filterstr
+        
         search_id = self.server.search(base,scope,filterstr,attrlist,attrsonly)
         result_type = 0
         
-        result_type = -1
-        while result_type != ldap.RES_SEARCH_RESULT:
+        results=list()
+        while True:
             result_type, result_data = self.server.result(search_id, all=all,timeout=timeout)
-            for result in result_data:
-                yield result
+            if result_type != ldap.RES_SEARCH_RESULT:
+                results.append(result_data[0])
+            else:
+                break;
+        return results
     
     def get(self,filterstr=def_filterstr,**kwargs):
-        return self.search(filterstr,**kwargs).next()
+        return self.search(filterstr,**kwargs)[0]
 
+################################################################################
+
+from MySQLdb import connect
+from MySQLdb.cursors import DictCursor
+
+class Mysql(object):
+
+    def __init__(self,host,user,password,db,**kwargs):
+        self.host=host
+        self.user=user
+        self.password=password
+        self.db=db
+        self.kwargs = dict([['connect_timeout',10],['cursorclass',DictCursor]]+kwargs.items())
+        
+    def connect(self):
+        self.conn = connect(self.host,self.user,self.password,self.db,**self.kwargs)
+        return self
+        
+    def query(self,query,values=None):
+        cursor = self.conn.cursor()
+        cursor.execute(query,values)
+        return cursor.fetchall()
+        
+        
+if __name__ == '__main__':
+    from pprint import PrettyPrinter
+    pprint = PrettyPrinter(indent=2).pprint
+    
+    #mysql = Mysql("127.0.0.1","senbook","S3nb00k!","redmine",port=3305).connect()
+    #pprint(mysql.query("SHOW TABLES"))
+    """
+    couch_settings=dict(
+            host='http://localhost:5984/',
+            name='nyss_senbook',
+        )
+        
+    mycouch = Couch(**couch_settings).connect()
+    print mycouch
+    pprint([r for r in mycouch.view('main/by_name')])
+    
+    """
+    ldap_settings=dict(
+            url='ldap://webmail.senate.state.ny.us/',
+            auth='simple',
+        )
+        
+    _ldap = Ldap(**ldap_settings).connect()
+    filterstr = '(&(member=%s)(objectClass=dominoGroup))' % 'CN=Andrew Hoppin,O=senate'#'Andrew Hoppin'
+    results = _ldap.search(filterstr)
+    pprint(results)
+    
