@@ -82,7 +82,7 @@ class PersonHandler(BaseHandler):
     def post(self,name,uid):
         people = fromId(uid)
         
-        if len(person)==1:
+        if len(people)==1:
             person = people[0]
             
             args = self.request.arguments
