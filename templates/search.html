@@ -5,7 +5,11 @@
 {{len(results)}} Results for '{{term}}'
 <br/><br/>
 {% for result in results %}
-    <b>{{getname(result[0])}}</b>:<br/>
+    <b>
+        <a {{'href="/person/%s+%s+(%s)"' % (result[1]['givenname'][0],result[1]['sn'][0],result[1]['uid'][0])}}>
+            {{ "%s %s" % (result[1]['givenname'][0],result[1]['sn'][0]) }}
+        </a>
+    </b>:<br/>
     {% for key,value in result[1].items() %}
         {% if key in ['telephonenumber','mail','department','l','st'] %}
             {{key}}:<i>{{value}}</i>

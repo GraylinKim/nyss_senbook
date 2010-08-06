@@ -3,10 +3,13 @@
 {% block body %}
 
 <form method="POST" action="/search">
+    Enter all or part of a name you'd like to search for. <br/>
+    Click the button corresponding to the type of search you'd like to perform. <br/>
+    When you just hit enter it defaults to searching people. <br/><br/>
     <input type="text" name="term" id="term" />
     <br/><br/>
-    <input type="submit" name="group" value="Search Groups" />
     <input type="submit" name="person" value="Search People" />
+    <input type="submit" name="group" value="Search Groups" />
 </form>
 
 {% end %}
