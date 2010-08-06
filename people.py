@@ -120,24 +120,18 @@ class Person(object):
             return self.data[name]
         else:
             raise AttributeError(name)
-            
-    def get(self,name,default=None):
-        if hasattr(self,name):
-            return getattr(self,name)
-        else:
-            return default
     
     def save(self):
-        if self.id in settings['couch']:
-            doc = settings['couch'][self.id]
-            for key,value in self.__dict__.iteritems():
-                doc[key] = value
-            settings['couch'][self.id] = doc
+        couch = settings['couch'].connect()
+        if self.uid in couch:
+            doc = couch[self.uid]
+            doc.update(self.data)
+            couch[self.uid] = doc
         else:
-            settings['couch'][self.id]=self.__dict__
+            couch[self.uid]=self.data
             
     def set_avatar(self,avatar):
-        filename = '%s.%s' % (self.name.remove(' ',''),avatar['filename'].rsplit('.')[-1])
+        filename = '%s.%s' % (self.name.replace(' ',''),avatar['filename'].rsplit('.')[-1])
         self.data['avatar'] = settings['avatars']+filename
         with open(settings['server_root']+'static/'+self.data['avatar'],'w') as outfile:
             outfile.write(avatar['body'])        
