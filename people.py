@@ -1,6 +1,6 @@
-import urllib
+import urllib,copy
 from settings import settings
-
+from datetime import datetime
 
 class RecordLoadError(Exception):
     pass
@@ -41,7 +41,7 @@ class RedminePerson(object):
     def getRecords(self,where,args):
         try:
             mysql = settings['mysql'].connect()
-            mysql_results = mysql.query( """
+            mysql_results = mysql.query("""
                     SELECT
                         users.id as id,
                         users.login as uid,
@@ -88,6 +88,9 @@ class CouchPerson(object):
     
     def __init__(self,result=None):
         self.data = result.value if result else dict()
+        for project in self.data.get('projects',[]):
+            #convert back to date time. this will burn and die in 2038
+            project['since'] = datetime.utcfromtimestamp(project['since'])
         
     @classmethod
     def getRecords(self,view,key):
@@ -123,12 +126,17 @@ class Person(object):
     
     def save(self):
         couch = settings['couch'].connect()
+        data = copy.deepcopy(self.data)
+        for project in data.get('projects',[]):
+            #put in unix time to store, will break in 2038
+            project['since'] = float(project['since'].strftime('%s'))
         if self.uid in couch:
             doc = couch[self.uid]
-            doc.update(self.data)
+            doc.update(data)
+            print doc
             couch[self.uid] = doc
         else:
-            couch[self.uid]=self.data
+            couch[self.uid]=data
             
     def set_avatar(self,avatar):
         filename = '%s.%s' % (self.uid,avatar['filename'].rsplit('.')[-1])
