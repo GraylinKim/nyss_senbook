@@ -162,7 +162,7 @@ class LoginHandler(BaseHandler):
             name = getNameFromUID(who)
             self.set_secure_cookie("uid",who)
             self.set_secure_cookie("uname",name)
-            self.redirect('/person/%s' % quote_plus(name))
+            self.redirect(quote_plus('/person/%s (%s)' % (name,who),'/()+'))
         else:
             self.render('templates/login.html',
                 title="Login",

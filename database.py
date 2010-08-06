@@ -141,7 +141,7 @@ if __name__ == '__main__':
     
     #mysql = Mysql("127.0.0.1","senbook","S3nb00k!","redmine",port=3305).connect()
     #pprint(mysql.query("SHOW TABLES"))
-    """
+    
     couch_settings=dict(
             host='http://localhost:5984/',
             name='nyss_senbook',
@@ -161,4 +161,4 @@ if __name__ == '__main__':
     filterstr = '(&(member=%s)(objectClass=dominoGroup))' % 'CN=Andrew Hoppin,O=senate'#'Andrew Hoppin'
     results = _ldap.search(filterstr)
     pprint(results)
-    
+    """

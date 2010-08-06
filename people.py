@@ -131,10 +131,10 @@ class Person(object):
             couch[self.uid]=self.data
             
     def set_avatar(self,avatar):
-        filename = '%s.%s' % (self.name.replace(' ',''),avatar['filename'].rsplit('.')[-1])
+        filename = '%s.%s' % (self.uid,avatar['filename'].rsplit('.')[-1])
         self.data['avatar'] = settings['avatars']+filename
         with open(settings['server_root']+'static/'+self.data['avatar'],'w') as outfile:
-            outfile.write(avatar['body'])        
+            outfile.write(avatar['body'])
     
 def fromId(uid):
     results = list()
@@ -184,6 +184,7 @@ def fromName(name):
 def reducePeople(people):
     people = people or []
     print "Reducing %i people" % len(people)
+    print people
     persons = dict()
     
     for person in people:
