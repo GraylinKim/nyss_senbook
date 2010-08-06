@@ -12,7 +12,7 @@ from settings import settings
 word = r'[A-Za-z\-\.]+'
 space = r'[\+\%0-9 ]+'
 sep = r'[\+\%0-9 ]*'
-uid = r'[a-z]+'
+uid = r'[a-z\.]+'
 lparen = r'(?:\(|%28)'
 rparen = r'(?:\)|%29)'
 application = tornado.web.Application([
