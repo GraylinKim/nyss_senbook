@@ -75,14 +75,6 @@ class Ldap(object):
             raise NotImplementedError("SASL authentication not yet implemented")
         
         return self
-        
-    def simple_auth(self,who,cred):
-        try:
-            self.server = ldap.initialize(self.url)
-            self.server.simple_bind_s(who,cred)
-            return True
-        except ldap.InvalidCredentials as e:
-            return False
             
     def search(self,filterstr=def_filterstr,**kwargs):
         options = dict(self.__dict__.items()+kwargs.items())
@@ -109,7 +101,8 @@ class Ldap(object):
         return results
     
     def get(self,filterstr=def_filterstr,**kwargs):
-        return self.search(filterstr,**kwargs)[0]
+        results = self.search(filterstr,**kwargs)
+        return results[0] if len(results) else None
 
 ################################################################################
 
@@ -134,14 +127,13 @@ class Mysql(object):
         cursor.execute(query,values)
         return cursor.fetchall()
         
-        
 if __name__ == '__main__':
     from pprint import PrettyPrinter
     pprint = PrettyPrinter(indent=2).pprint
     
     #mysql = Mysql("127.0.0.1","senbook","S3nb00k!","redmine",port=3305).connect()
     #pprint(mysql.query("SHOW TABLES"))
-    
+    """
     couch_settings=dict(
             host='http://localhost:5984/',
             name='nyss_senbook',
@@ -150,8 +142,8 @@ if __name__ == '__main__':
     mycouch = Couch(**couch_settings).connect()
     print mycouch
     pprint([r for r in mycouch.view('main/by_name')])
-    
     """
+    
     ldap_settings=dict(
             url='ldap://webmail.senate.state.ny.us/',
             auth='simple',
@@ -161,4 +153,4 @@ if __name__ == '__main__':
     filterstr = '(&(member=%s)(objectClass=dominoGroup))' % 'CN=Andrew Hoppin,O=senate'#'Andrew Hoppin'
     results = _ldap.search(filterstr)
     pprint(results)
-    """
+    

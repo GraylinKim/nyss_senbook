@@ -10,21 +10,21 @@
         </div>
         <div id="profile_overview">
             <div class="profile_name">{{person.name}}</div>
-            {% if person.data.get('title') %}
+            {% if 'title' in person.data %}
                 <div class="profile_title">{{person.data['title'][0]}}</div>
             {% end %}
             <br/>
-            {% if person.data.get('telephonenumber') %}
+            {% if 'telephonenumber' in person.data %}
                 <div class="profile_phone">Phone: {{person.data['telephonenumber'][0]}}</div>
             {% end %}
-            {% if person.data.get('mail') %}
+            {% if 'mail' in person.data %}
                 <div class="profile_email">Email:
                     <a {{'href="mailto:%s"' % person.data.get('mail')[0]}}>
                         {{person.data['mail'][0]}}
                     </a>
                 </div>
             {% end %}
-            {% if person.data.get('l') and person.data.get('st') %}
+            {% if ('l' in person.data) and ('st' in person.data) %}
                 <div class="profile_location">
                     Location: {{"%s, %s" % (person.data['l'][0],person.data['st'][0])}}
                 </div>
@@ -43,10 +43,11 @@
                 {{person.data['aboutme'][0]}}
             </div>
         {% end %}
+        
+        {% if 'projects' in person.data %}
         <div id="profile_projects">
             Redmine Projects:
             <ul class="profile_list">
-                {% if 'projects' in person.data %}
                     {% for project in person.data['projects'] %}
                     <li>
                         <a {{'href="/project/%s"' % project['name']}} >
@@ -54,20 +55,20 @@
                         </a> - (<i>{{project['role']}}</i>)
                     </li>
                     {% end %}
-                {% else %}
-                    <li>None</li>
-                {% end %}
             </ul>
         </div>
-        <div id="profile_groups">
+        {% end %}
         
+        {% if 'groups' in person.data %}
+        <div id="profile_groups">
             Groups I am part of ({{len(person.data['groups'])}} total):
             <ul class="profile_list">
             {% for cn, info in person.data['groups'] %}
                 <li><a {{'href="/group/%s"' % cn[3:]}} >{{info['cn'][0]}}</a><br/>
             {% end %}
             </ul>
-            
+        {% end %}
+        
         </div>
     </div>
     {% end %}

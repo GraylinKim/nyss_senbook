@@ -1,4 +1,5 @@
-import urllib,copy
+import urllib,copy,hashlib
+
 from settings import settings
 from datetime import datetime
 
@@ -19,6 +20,18 @@ class LdapPerson(object):
             self.data['name'] = self.data.get('givenname',[''])[0]+' '+self.data.get('sn',[''])[0]
         
     @classmethod
+    def auth(self,who,cred):  
+        print "LDAP Authentication on '%s' with '%s'" % (who,cred)
+        try:
+            import ldap
+            server = ldap.initialize(settings['ldap_settings']['url'])
+            server.simple_bind_s(who,cred)
+            data = settings['ldap'].connect().get("(uid=%s)" % who)[1]
+            return data['givenname'][0]+' '+data['sn'][0]
+        except ldap.INVALID_CREDENTIALS as e:
+            return False
+            
+    @classmethod
     def getRecords(self,key,value):
         try:
             ldap = settings['ldap'].connect()
@@ -35,7 +48,23 @@ class RedminePerson(object):
     
     def __init__(self,data=None):
         self.data = data or dict()
-        self.data['name'] = self.data.get('givenname',[''])[0]+' '+self.data.get('sn',[''])[0]
+        self.data['name'] = self.data.get('givenname','')+' '+self.data.get('sn','')
+        
+    @classmethod
+    def auth(self,who,cred):
+        print "Redmine Authentication on '%s' with '%s'" % (who,cred)
+        mysql = settings['mysql'].connect()
+        
+        args = (who,hashlib.sha1(cred).hexdigest())
+        results  = mysql.query( """ 
+                SELECT firstname,lastname 
+                FROM users
+                WHERE 
+                    login=%s AND hashed_password=%s""" , args )
+                    
+        if results:
+            return results[0]['firstname']+' '+results[0]['lastname']
+        return False
         
     @classmethod
     def getRecords(self,where,args):
@@ -62,7 +91,7 @@ class RedminePerson(object):
             for row in mysql_results:
                 person[row['id']] = dict(
                         uid=row['uid'],
-                        given=row['givenname'],
+                        givenname=row['givenname'],
                         sn=row['sn'],
                         projects=set(),
                     )
@@ -204,10 +233,11 @@ def reducePeople(people):
     return persons.values()
     
 def authenticate(who,cred):
-    return settings['ldap'].simple_auth(who,cred)
+    return LdapPerson.auth(who,cred) or RedminePerson.auth(who,cred)
     
 def getNameFromUID(who):
-    return settings['ldap'].get("(uid=%s)" % who)[1]['cn'][0]
+    ldap = settings['ldap'].connect()
+    return ldap.get("(uid=%s)" % who)[1]['cn'][0]
     
 if __name__ == '__main__':
     from pprint import PrettyPrinter

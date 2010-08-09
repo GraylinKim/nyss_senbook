@@ -9,7 +9,7 @@
         <div id="header">
             <div id="accountbox">
                 {% if user == None %}
-                    <a href="/login?ret={{url}}">Log in here</a>
+                    <a href="/login">Log in here</a>
                 {% else %}
                     Logged in as <b>{{user}}</b><br/>
                     Click to <a href="/logout?ret={{url}}">log out</a>

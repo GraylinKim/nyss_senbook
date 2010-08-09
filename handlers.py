@@ -144,7 +144,8 @@ class LoginHandler(BaseHandler):
         
     def get(self):
         if self.current_user:
-            self.redirect('/person/%s' % quote_plus(self.current_user))
+            url = '%s (%s)' % (self.current_user,self.get_secure_cookie("uid"))
+            self.redirect(quote_plus('/person/'+url,'/()+'))
         else:
             self.render('templates/login.html',title="Login")
         
@@ -152,8 +153,8 @@ class LoginHandler(BaseHandler):
         who = self.get_argument("who")
         cred = self.get_argument("cred")
         
-        if authenticate(who,cred):
-            name = getNameFromUID(who)
+        name = authenticate(who,cred)
+        if name:
             self.set_secure_cookie("uid",who)
             self.set_secure_cookie("uname",name)
             self.redirect(quote_plus('/person/%s (%s)' % (name,who),'/()+'))
