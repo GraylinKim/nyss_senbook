@@ -68,3 +68,12 @@ Person.html styles ************************************************************/
     
     #childprojects { display:inline; }
     #childprojects li { display:inline; padding:0px 5px;}
+    
+/*******************************************************************************
+Project.html styles ***********************************************************/
+
+.newsitem { padding:10px; }
+.newsmeta { font-style:italic; }
+.newstitle { font-weight:bold; font-size:20px; }
+.newsauthor { font-variant:small-caps; }
+.newsbody { padding:10px; }
