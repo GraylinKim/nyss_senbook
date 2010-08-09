@@ -6,7 +6,6 @@ class Group(object):
         server = settings['ldap'].connect()
         filterstr = '(&(cn=%s)(objectClass=dominoGroup))' % name
         results = server.search(filterstr)
-        print "RESULTS %s" % results
         self.id, self.data = results[0]
         
     def __getitem__(self,name):

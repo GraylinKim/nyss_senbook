@@ -71,9 +71,9 @@ class Project(object):
                                 started=row['subproject_started'],
                                 updated=row['subproject_updated'],
                             )
-                        ] for row in results
+                        ] for row in results if row['subproject_name']!=None
                     ]).values(),
-                newsitems=dict([
+                newsitems=reversed(dict([
                         [
                             row['news_id'],dict(
                                 started=row['news_date'],
@@ -82,8 +82,8 @@ class Project(object):
                                 summary=row['news_summary'],
                                 description=row['news_description'],
                             )
-                        ] for row in results
-                    ]).values(),
+                        ] for row in results if row['news_title']!=None
+                    ]).values()),
                 members=dict([
                         [
                             row['member_id'], dict(

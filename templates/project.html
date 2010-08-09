@@ -4,24 +4,30 @@
     <div id="profile_header">
         <div id="profile_overview">
             <div class="profile_name">{{project.data['name']}}</div>
-            {% if project.data['parentproject']['name'] %}
-                <div>
-                    Parent Project - 
-                    <a {{'href="/project/%s"' % project.data['parentproject']['name']}}>
-                        {{project.data['parentproject']['name']}}
-                    </a>
+                <div>Parent Project - 
+                    {% if project.data['parentproject']['name'] %}
+                        <a {{'href="/project/%s"' % project.data['parentproject']['name']}}>
+                            {{project.data['parentproject']['name']}}
+                        </a>
+                    {% else %}
+                        None
+                    {% end %}
                 </div>
-            {% end %}
-            <div>Child Projects:            
-                {% for child in project.data['childprojects'] %}
-                    <ul id="childprojects" class="plainlist">
-                        <li>
-                            |<a {{'href="/project/%s"' % child['name']}}>
+            <div>Child Projects:
+                <ul id="childprojects" class="plainlist">
+                    {% if not project.data['childprojects'] %}None{% end %}
+                    {% for child in project.data['childprojects'] %}                        
+                        <li>|
+                            {% if child['name'] != None %}
+                                <a {{'href="/project/%s"' % child['name']}}>
+                                    {{child['name']}}
+                                </a>
+                            {% else %}
                                 {{child['name']}}
-                            </a>|
-                        </li>
-                    </ul>
-                {% end %}
+                            {% end %}
+                        |</li>
+                    {% end %}
+                </ul>
             </div>
         </div>
         <div class="clear"> </div>
@@ -44,6 +50,16 @@
                     </a>
                 </li>
             </ul>
+        {% end %}
+        {% for news in project.data['newsitems'] %}
+            <div class="newsitem">
+                <div class="newstitle">{{news['title']}}</div>
+                <div class="newsmeta">
+                  <span class="newsauthor">{{news['author']}}</span>
+                  <span class="newsstarted">{{news['started'].date()}}</span>
+                </div>
+                <div class="newsbody">{{news['summary'] if news['summary'] else news['description'] }}</div>
+            </div>
         {% end %}
         </div>
     </div>
