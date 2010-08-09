@@ -118,24 +118,11 @@ class ProjectHandler(BaseHandler):
             
 ################################################################################
 # Search Handlers
-
-class SearchRouter(BaseHandler):
-    def get(self):
-        self.redirect("/")
-        
-    def post(self):
-        if self.get_argument("group",None):
-            oclass = "group"
-        elif self.get_argument("person",None):
-            oclass = "person"
-        else:
-            raise ValueError("Someone posted in a bad way")
-        
-        self.redirect('/search/%s/%s' % (oclass,self.get_argument("term","")))
         
 class SearchHandler(BaseHandler):
-    def get(self,otype,term):
+    def get(self):
         results = dict()
+        term = self.get_argument('q')
         server = settings['ldap'].connect()
         
         for rtype in ['group','person']:
@@ -149,7 +136,7 @@ class SearchHandler(BaseHandler):
             groups = results['group'],
             people = results['person'],
             term = term)
-
+        
 ################################################################################
 # Login Handlers
 
