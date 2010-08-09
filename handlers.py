@@ -135,12 +135,19 @@ class SearchRouter(BaseHandler):
         
 class SearchHandler(BaseHandler):
     def get(self,otype,term):
-        server = settings['ldap'].connect()  
-        filterstr = '(&(cn=*%s*)(objectClass=domino%s))' % (term,otype)
-        results = server.search(filterstr)
+        results = dict()
+        server = settings['ldap'].connect()
+        
+        for rtype in ['group','person']:
+            filterstr = '(objectClass=domino%s)' % rtype
+            searchstr = '(|(cn=?)(cn=*?)(cn=?*)(cn=*?*))'.replace('?',term)
+            results[rtype] = server.search('(& %s %s)' % (searchstr,filterstr))
+        
+        title = "Query %s has: %i Person Results and %i Group Results"
         self.render('templates/search.html',
-            title="%s Search Results (%s)" % (otype,len(results)),
-            results = results,
+            title = title % (term,len(results['group']),len(results['person'])),
+            groups = results['group'],
+            people = results['person'],
             term = term)
 
 ################################################################################
