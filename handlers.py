@@ -1,8 +1,10 @@
 from tornado.web import authenticated,RequestHandler
 from settings import settings
-from people import Person,fromName,fromId,authenticate,getNameFromUID
-from project import Project
-from group import Group
+
+import people as People,projects as Projects,groups as Groups
+from people import Person,getNameFromUID
+from projects import Project
+from groups import Group
 from urllib import quote_plus, unquote_plus
 
 ################################################################################
@@ -36,7 +38,7 @@ class MainHandler(BaseHandler):
 
 class PersonIdRouter(BaseHandler):
     def get(self,uid):
-        people = fromId(uid)
+        people = People.fromId(uid)
         if len(people)==0:
             self.render('templates/noperson.html',title="No Such Person")
         elif len(people)!=1:
@@ -48,19 +50,20 @@ class PersonIdRouter(BaseHandler):
             
 class PersonNameRouter(BaseHandler):
     def get(self,name):
-        people = fromName(name)
+        people = People.fromName(name)
         if len(people)==0:
             self.render('templates/noperson.html',title="No Such Person")
         elif len(people)!=1:
             self.render('templates/whichperson.html',title="Mutiple Matches",people=people)
         else: #len(people)==1:
             person = people[0]
+            print person.data
             args = (unquote_plus(name),person.data['uid'])
             self.redirect(quote_plus( '/person/%s (%s)' % args ,'+()/' ))
         
 class PersonHandler(BaseHandler):
     def get(self,name,uid):
-        people = fromId(uid)
+        people = People.fromId(uid)
         if len(people)==0:
             self.render('templates/noperson.html',title="No Such Person")
             return
@@ -80,7 +83,7 @@ class PersonHandler(BaseHandler):
     
     @authenticated
     def post(self,name,uid):
-        people = fromId(uid)
+        people = People.fromId(uid)
         
         if len(people)==1:
             person = people[0]
@@ -98,16 +101,18 @@ class PersonHandler(BaseHandler):
         
 class GroupHandler(BaseHandler):
     def get(self,name):
+        groups = Groups.fromName(name)
+        if len(groups)==0:
+            self.render('templates/nogroup.html',title="No Such Group found")
+            return
+        if len(groups)!=1:
+            self.render('templates/whichgroup.html',title="Multiple matching groups",groups=groups)
+            return
         
-        try:
-            group = Group(unquote_plus(name))
-            self.render('templates/group.html',
-                title="%s - Profile" % group.data['displayname'],
-                data=group.data,
-                name=group.id)
-                
-        except StopIteration as e:
-            self.render('templates/no_match.html',title="No Such Group")
+        group = groups[0]
+        self.render('templates/group.html',
+            title="%s - Profile" % group.name,
+            group=group,)
 
 class ProjectHandler(BaseHandler):
     def get(self,project):
@@ -125,10 +130,11 @@ class SearchHandler(BaseHandler):
         term = self.get_argument('q')
         server = settings['ldap'].connect()
         
-        for rtype in ['group','person']:
-            filterstr = '(objectClass=domino%s)' % rtype
-            searchstr = '(|(cn=?)(cn=*?)(cn=?*)(cn=*?*))'.replace('?',term)
-            results[rtype] = server.search('(& %s %s)' % (searchstr,filterstr))
+        groupfilter = '(objectClass=dominoGroup)(giddisplay=Public)'
+        personfilter = '(objectClass=dominoPerson)(employeeid=*)(!(employeeid=999*))(!(employeeid=0000))'
+        searchstr = '(|(cn=?)(cn=*?)(cn=?*)(cn=*?*))'.replace('?',term)
+        results['group'] = server.search('(& %s %s)' % (searchstr,groupfilter))
+        results['person'] = server.search('(& %s %s)' % (searchstr,personfilter))
         
         title = "Query %s has: %i Person Results and %i Group Results"
         self.render('templates/search.html',
@@ -153,7 +159,7 @@ class LoginHandler(BaseHandler):
         who = self.get_argument("who")
         cred = self.get_argument("cred")
         
-        name = authenticate(who,cred)
+        name = People.authenticate(who,cred)
         if name:
             self.set_secure_cookie("uid",who)
             self.set_secure_cookie("uname",name)

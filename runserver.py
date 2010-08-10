@@ -18,8 +18,8 @@ rparen = r'(?:\)|%29)'
 application = tornado.web.Application([
         (r'/', MainHandler),
         (r'/person/(%s)' % uid, PersonIdRouter),
-        (r'/person/(%s%s%s)' % (word,space,word), PersonNameRouter),
-        (r'/person/(%s%s%s)%s%s(%s)%s/?' % (word,space,word,sep,lparen,uid,rparen), PersonHandler),
+        (r'/person/(%s(?:%s)?%s)' % (word,space,word), PersonNameRouter),
+        (r'/person/(%s(?:%s)%s)%s%s(%s)%s/?' % (word,space,word,sep,lparen,uid,rparen), PersonHandler),
         (r'/group/([A-Z\+\%\*\._ \-a-z0-9]+)/?', GroupHandler),
         (r'/project/([A-Z\+\%\*\._\-a-z0-9\(\)]+)/?', ProjectHandler),
         (r'/search/?', SearchHandler ),

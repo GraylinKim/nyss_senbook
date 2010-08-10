@@ -5,9 +5,9 @@
     <div id="profile_header">
         <div id="profile_avatar" ></div>
         <div id="profile_overview">
-            <div class="profile_name">{{data['displayname'][0]}}</div>
-            {% if 'mail' in data %}
-                <div class="profile_email">Email: <a {{'href="mailto:%s"' % data['mail'][0]}}>{{data['mail'][0]}}</a></div>
+            <div class="profile_name">{{group.name}}</div>
+            {% if 'mail' in group.data %}
+                <div class="profile_email">Email: <a {{'href="mailto:%s"' % group.mail[0]}}>{{group.mail[0]}}</a></div>
             {% end %}
         </div>
         
@@ -18,10 +18,14 @@
         
         <div id="profile_groups">
         
-            Members of this group ({{len(data['member'])}} total):
+            Members of this group ({{len(group.members)}} total):
             <ul class="profile_list">
-            {% for member in data['member'] %}
-                <li><a {{'href="/person/%s"' % getname(member)}}>{{getname(member)}}</a></li>
+            {% for member in group.members %}
+                {% if 'uid' in member.data %}
+                    <li><a {{'href="/person/%s (%s)"' % (member.name,member.uid)}}>{{member.cn[0]}}</a></li>
+                {% else %}
+                    <li><a {{'href="/group/%s"' % member.name}}>{{member.name}}</a></li>
+                {% end %}
             {% end %}
             </ul>
         </div>

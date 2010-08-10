@@ -59,7 +59,7 @@
         </div>
         {% end %}
         
-        {% if 'groups' in person.data %}
+        {% if 'groups' in person.data and person.groups %}
         <div id="profile_groups">
             Groups I am part of ({{len(person.data['groups'])}} total):
             <ul class="profile_list">

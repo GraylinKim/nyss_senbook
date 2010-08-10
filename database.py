@@ -86,7 +86,7 @@ class Ldap(object):
         timeout = options.get('timeout', -1)
         all = options.get('all',0)
         
-        print filterstr
+        print filterstr[0:100]
         
         search_id = self.server.search(base,scope,filterstr,attrlist,attrsonly)
         result_type = 0
@@ -95,7 +95,11 @@ class Ldap(object):
         while True:
             result_type, result_data = self.server.result(search_id, all=all,timeout=timeout)
             if result_type != ldap.RES_SEARCH_RESULT:
-                results.append(result_data[0])
+                print result_data
+                if all:
+                    results.extend(result_data)
+                else:
+                    results.append(result_data[0])
             else:
                 break;
         return results

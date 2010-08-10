@@ -5,7 +5,7 @@ from datetime import datetime
 
 class RecordLoadError(Exception):
     pass
-
+    
 class LdapPerson(object):
     
     def __init__(self,result=None):
@@ -13,14 +13,11 @@ class LdapPerson(object):
             self.data = dict()
         else:
             cn, self.data = result
-            ldap = settings['ldap'].connect()
-            filterstr = '(&(member=%s)(objectClass=dominoGroup))' % cn
-            self.data['groups'] = [r for r in ldap.search(filterstr)]
             self.data['uid'] = self.data['uid'][0]
             self.data['name'] = self.data.get('givenname',[''])[0]+' '+self.data.get('sn',[''])[0]
         
     @classmethod
-    def auth(self,who,cred):  
+    def auth(self,who,cred):
         print "LDAP Authentication on '%s' with '%s'" % (who,cred)
         try:
             import ldap
@@ -32,18 +29,36 @@ class LdapPerson(object):
             return False
             
     @classmethod
-    def getRecords(self,key,value):
+    def getGroups(self,result):
+        cn, data = result
+        ldap = settings['ldap'].connect()
+        filterstr = '(&(member=%s)(objectClass=dominoGroup)(giddisplay=Public))' % cn
+        data['groups'] = [r for r in ldap.search(filterstr)]
+        return result
+        
+    @classmethod
+    def getRecords(self,key,value,full=True):
         try:
             ldap = settings['ldap'].connect()
-            filterstr = '(&(%s=%s)(objectClass=dominoPerson))'        
+            filterstr = '(&(%s=%s)(objectClass=dominoPerson)(employeeid=*)(!(employeeid=999*))(!(employeeid=0000)))'        
             ldap_results = ldap.search( filterstr % (key,value))
+            
+            if full:
+                results = [LdapPerson.getGroups(result) for result in ldap_results]
+                
             return [LdapPerson(result) for result in ldap_results]
         except KeyError as e:
             raise RecordLoadError("LDAP data source missing")
         except Exception as e:
             print repr(e)
             raise RecordLoadError("LDAP error: %s" % repr(e))
-
+            
+    def __getattr__(self,name):
+        if name in self.data:
+            return self.data[name]
+        else:
+            raise AttributeError(name)
+            
 class RedminePerson(object):
     
     def __init__(self,data=None):
@@ -146,7 +161,7 @@ class Person(object):
         elif name in self.data:
             return self.data[name]
         raise KeyError("No such attribute '%s' for person" % name)
-    
+        
     def __getattr__(self,name):
         if name in self.data:
             return self.data[name]
