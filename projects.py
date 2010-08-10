@@ -1,3 +1,5 @@
+from operator import itemgetter
+
 from settings import settings
 
 """
@@ -73,7 +75,7 @@ class Project(object):
                             )
                         ] for row in results if row['subproject_name']!=None
                     ]).values(),
-                newsitems=reversed(dict([
+                newsitems=sorted(dict([
                         [
                             row['news_id'],dict(
                                 started=row['news_date'],
@@ -83,7 +85,7 @@ class Project(object):
                                 description=row['news_description'],
                             )
                         ] for row in results if row['news_title']!=None
-                    ]).values()),
+                    ]).values(),key=itemgetter('started'),reverse=True),
                 members=dict([
                         [
                             row['member_id'], dict(
